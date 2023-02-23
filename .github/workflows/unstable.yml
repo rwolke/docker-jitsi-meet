@@ -26,7 +26,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
@@ -46,7 +46,7 @@ jobs:
             ${{ secrets.JITSI_REPO }}/base:${{ needs.version.outputs.date }}
           build-args: |
             JITSI_RELEASE=unstable
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Dryrun
@@ -59,7 +59,7 @@ jobs:
             jitsi/base:${{ needs.version.outputs.date }}
           build-args: |
             JITSI_RELEASE=unstable
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -72,7 +72,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
@@ -93,7 +93,7 @@ jobs:
           build-args: |
             JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Dryrun
@@ -107,7 +107,7 @@ jobs:
           build-args: |
             JITSI_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -120,7 +120,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
@@ -141,7 +141,7 @@ jobs:
           build-args: |
             JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Dryrun
@@ -155,7 +155,7 @@ jobs:
           build-args: |
             JITSI_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -168,7 +168,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
@@ -189,7 +189,7 @@ jobs:
           build-args: |
             JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Dryrun
@@ -203,7 +203,7 @@ jobs:
           build-args: |
             JITSI_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -216,7 +216,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
@@ -237,7 +237,7 @@ jobs:
           build-args: |
             JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Dryrun
@@ -251,7 +251,7 @@ jobs:
           build-args: |
             JITSI_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -264,7 +264,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
@@ -285,7 +285,7 @@ jobs:
           build-args: |
             JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Dryrun
@@ -299,7 +299,7 @@ jobs:
           build-args: |
             JITSI_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -312,7 +312,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
@@ -333,7 +333,7 @@ jobs:
           build-args: |
             JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Dryrun
@@ -347,7 +347,7 @@ jobs:
           build-args: |
             JITSI_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -360,7 +360,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
@@ -381,7 +381,7 @@ jobs:
           build-args: |
             JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Dryrun
@@ -395,6 +395,6 @@ jobs:
           build-args: |
             JITSI_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
