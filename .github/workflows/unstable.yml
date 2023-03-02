@@ -2,6 +2,7 @@ name: Unstable Build
 
 on:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   version:
