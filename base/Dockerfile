@@ -21,7 +21,7 @@ RUN case ${TARGETPLATFORM} in \
          "linux/arm64")  S6_ARCH=aarch64  ;; \
          "linux/s390x")  S6_ARCH=s390x  ;; \
     esac && \
-    wget -qO - https://github.com/just-containers/s6-overlay/releases/download/v3.1.4.1/s6-overlay-${S6_ARCH}.tar.xz | tar xf - -C /
+    wget -qO - https://github.com/just-containers/s6-overlay/releases/download/v3.1.4.1/s6-overlay-${S6_ARCH}.tar.xz | unxz -c | tar xf - -C /
 
 RUN wget -qO - https://download.jitsi.org/jitsi-key.gpg.key | gpg --dearmour > /etc/apt/trusted.gpg.d/jitsi.gpg && \
     echo "deb https://download.jitsi.org $JITSI_RELEASE/" > /etc/apt/sources.list.d/jitsi.list && \
