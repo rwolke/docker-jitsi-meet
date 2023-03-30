@@ -27,18 +27,13 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        if: ${{ github.event_name != 'pull_request' }}
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
+          secrets: |
+            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./base
           tags: |
             ${{ secrets.JITSI_REPO }}/base:${{ needs.version.outputs.base }}
@@ -74,18 +69,13 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        if: ${{ github.event_name != 'pull_request' }}
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
+          secrets: |
+            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./base-java
           tags: |
             ${{ secrets.JITSI_REPO }}/base-java:${{ needs.version.outputs.base }}
@@ -123,18 +113,13 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        if: ${{ github.event_name != 'pull_request' }}
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
+          secrets: |
+            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./jibri
           tags: |
             ${{ secrets.JITSI_REPO }}/jibri:${{ needs.version.outputs.base }}
@@ -172,18 +157,13 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        if: ${{ github.event_name != 'pull_request' }}
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
+          secrets: |
+            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./jicofo
           tags: |
             ${{ secrets.JITSI_REPO }}/jicofo:${{ needs.version.outputs.base }}
@@ -221,18 +201,13 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        if: ${{ github.event_name != 'pull_request' }}
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
+          secrets: |
+            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./jigasi
           tags: |
             ${{ secrets.JITSI_REPO }}/jigasi:${{ needs.version.outputs.base }}
@@ -270,18 +245,13 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        if: ${{ github.event_name != 'pull_request' }}
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
+          secrets: |
+            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./jvb
           tags: |
             ${{ secrets.JITSI_REPO }}/jvb:${{ needs.version.outputs.base }}
@@ -319,18 +289,13 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        if: ${{ github.event_name != 'pull_request' }}
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
+          secrets: |
+            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./prosody
           tags: |
             ${{ secrets.JITSI_REPO }}/prosody:${{ needs.version.outputs.base }}
@@ -368,18 +333,13 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        if: ${{ github.event_name != 'pull_request' }}
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
+          secrets: |
+            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./web
           tags: |
             ${{ secrets.JITSI_REPO }}/web:${{ needs.version.outputs.base }}
