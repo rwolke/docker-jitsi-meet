@@ -7,7 +7,7 @@ ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
 COPY rootfs /
 
 RUN apt-dpkg-wrap apt-get update && \
-    apt-dpkg-wrap apt-get install -y apt-transport-https apt-utils ca-certificates gnupg wget xz
+    apt-dpkg-wrap apt-get install -y apt-transport-https apt-utils ca-certificates gnupg wget xz-utils
 
 RUN case ${TARGETPLATFORM} in \
          "linux/amd64")  TPL_ARCH=amd64  ;; \
