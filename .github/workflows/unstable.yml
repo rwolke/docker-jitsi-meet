@@ -27,17 +27,28 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
+      -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
-          secrets: |
-            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./base
           tags: |
-            ${{ secrets.TARGET_REPO }}/base:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/base:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/base:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/base:${{ needs.version.outputs.date }}
           build-args: |
             JITSI_RELEASE=unstable
           platforms: linux/amd64,linux/s390x
@@ -49,8 +60,8 @@ jobs:
         with:
           context: ./base
           tags: |
-            ${{ secrets.TARGET_REPO }}/base:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/base:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/base:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/base:${{ needs.version.outputs.date }}
           build-args: |
             JITSI_RELEASE=unstable
           platforms: linux/amd64,linux/s390x
@@ -69,19 +80,23 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
-          secrets: |
-            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./base-java
           tags: |
-            ${{ secrets.TARGET_REPO }}/base-java:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/base-java:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/base-java:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/base-java:${{ needs.version.outputs.date }}
           build-args: |
-            TARGET_REPO=${{ secrets.TARGET_REPO }}
+            JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -92,10 +107,10 @@ jobs:
         with:
           context: ./base-java
           tags: |
-            ${{ secrets.TARGET_REPO }}/base-java:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/base-java:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/base-java:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/base-java:${{ needs.version.outputs.date }}
           build-args: |
-            TARGET_REPO=jitsi
+            JITSI_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -113,19 +128,23 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
-          secrets: |
-            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./jibri
           tags: |
-            ${{ secrets.TARGET_REPO }}/jibri:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/jibri:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/jibri:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/jibri:${{ needs.version.outputs.date }}
           build-args: |
-            TARGET_REPO=${{ secrets.TARGET_REPO }}
+            JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -136,10 +155,10 @@ jobs:
         with:
           context: ./jibri
           tags: |
-            ${{ secrets.TARGET_REPO }}/jibri:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/jibri:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/jibri:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/jibri:${{ needs.version.outputs.date }}
           build-args: |
-            TARGET_REPO=jitsi
+            JITSI_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -157,19 +176,23 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
-          secrets: |
-            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./jicofo
           tags: |
-            ${{ secrets.TARGET_REPO }}/jicofo:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/jicofo:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/jicofo:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/jicofo:${{ needs.version.outputs.date }}
           build-args: |
-            TARGET_REPO=${{ secrets.TARGET_REPO }}
+            JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -180,10 +203,10 @@ jobs:
         with:
           context: ./jicofo
           tags: |
-            ${{ secrets.TARGET_REPO }}/jicofo:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/jicofo:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/jicofo:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/jicofo:${{ needs.version.outputs.date }}
           build-args: |
-            TARGET_REPO=jitsi
+            JITSI_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -201,19 +224,23 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
-          secrets: |
-            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./jigasi
           tags: |
-            ${{ secrets.TARGET_REPO }}/jigasi:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/jigasi:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/jigasi:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/jigasi:${{ needs.version.outputs.date }}
           build-args: |
-            TARGET_REPO=${{ secrets.TARGET_REPO }}
+            JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -224,10 +251,10 @@ jobs:
         with:
           context: ./jigasi
           tags: |
-            ${{ secrets.TARGET_REPO }}/jigasi:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/jigasi:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/jigasi:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/jigasi:${{ needs.version.outputs.date }}
           build-args: |
-            TARGET_REPO=jitsi
+            JITSI_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -245,19 +272,23 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
-          secrets: |
-            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./jvb
           tags: |
-            ${{ secrets.TARGET_REPO }}/jvb:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/jvb:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/jvb:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/jvb:${{ needs.version.outputs.date }}
           build-args: |
-            TARGET_REPO=${{ secrets.TARGET_REPO }}
+            JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -268,10 +299,10 @@ jobs:
         with:
           context: ./jvb
           tags: |
-            ${{ secrets.TARGET_REPO }}/jvb:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/jvb:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/jvb:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/jvb:${{ needs.version.outputs.date }}
           build-args: |
-            TARGET_REPO=jitsi
+            JITSI_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -289,19 +320,23 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
-          secrets: |
-            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./prosody
           tags: |
-            ${{ secrets.TARGET_REPO }}/prosody:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/prosody:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/prosody:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/prosody:${{ needs.version.outputs.date }}
           build-args: |
-            TARGET_REPO=${{ secrets.TARGET_REPO }}
+            JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -312,10 +347,10 @@ jobs:
         with:
           context: ./prosody
           tags: |
-            ${{ secrets.TARGET_REPO }}/prosody:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/prosody:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/prosody:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/prosody:${{ needs.version.outputs.date }}
           build-args: |
-            TARGET_REPO=jitsi
+            JITSI_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -333,19 +368,23 @@ jobs:
           platforms: linux/amd64,linux/s390x
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
-          secrets: |
-            "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./web
           tags: |
-            ${{ secrets.TARGET_REPO }}/web:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/web:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/web:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/web:${{ needs.version.outputs.date }}
           build-args: |
-            TARGET_REPO=${{ secrets.TARGET_REPO }}
+            JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -356,10 +395,10 @@ jobs:
         with:
           context: ./web
           tags: |
-            ${{ secrets.TARGET_REPO }}/web:${{ needs.version.outputs.base }}
-            ${{ secrets.TARGET_REPO }}/web:${{ needs.version.outputs.date }}
+            ${{ secrets.JITSI_REPO }}/web:${{ needs.version.outputs.base }}
+            ${{ secrets.JITSI_REPO }}/web:${{ needs.version.outputs.date }}
           build-args: |
-            TARGET_REPO=jitsi
+            JITSI_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
