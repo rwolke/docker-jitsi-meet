@@ -17,7 +17,7 @@ RUN case ${TARGETPLATFORM} in \
     wget -qO /usr/bin/tpl https://github.com/rwolke/tpl/releases/download/v0.0.1/tpl-linux-${TPL_ARCH}
 
 RUN case ${TARGETPLATFORM} in \
-         "linux/amd64")  S6_ARCH=amd64  ;; \
+         "linux/amd64")  S6_ARCH=x86_64  ;; \
          "linux/arm64")  S6_ARCH=aarch64  ;; \
          "linux/s390x")  S6_ARCH=s390x  ;; \
     esac && \
