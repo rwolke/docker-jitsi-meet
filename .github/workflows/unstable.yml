@@ -36,8 +36,8 @@ jobs:
             "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./base
           tags: |
-            ${{ secrets.JITSI_REPO }}/base:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/base:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/base:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/base:${{ needs.version.outputs.date }}
           build-args: |
             JITSI_RELEASE=unstable
           platforms: linux/amd64,linux/s390x
@@ -49,8 +49,8 @@ jobs:
         with:
           context: ./base
           tags: |
-            jitsi/base:${{ needs.version.outputs.base }}
-            jitsi/base:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/base:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/base:${{ needs.version.outputs.date }}
           build-args: |
             JITSI_RELEASE=unstable
           platforms: linux/amd64,linux/s390x
@@ -78,10 +78,10 @@ jobs:
             "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./base-java
           tags: |
-            ${{ secrets.JITSI_REPO }}/base-java:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/base-java:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/base-java:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/base-java:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=${{ secrets.JITSI_REPO }}
+            TARGET_REPO=${{ secrets.TARGET_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -92,10 +92,10 @@ jobs:
         with:
           context: ./base-java
           tags: |
-            jitsi/base-java:${{ needs.version.outputs.base }}
-            jitsi/base-java:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/base-java:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/base-java:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=jitsi
+            TARGET_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -122,10 +122,10 @@ jobs:
             "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./jibri
           tags: |
-            ${{ secrets.JITSI_REPO }}/jibri:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/jibri:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/jibri:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/jibri:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=${{ secrets.JITSI_REPO }}
+            TARGET_REPO=${{ secrets.TARGET_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -136,10 +136,10 @@ jobs:
         with:
           context: ./jibri
           tags: |
-            jitsi/jibri:${{ needs.version.outputs.base }}
-            jitsi/jibri:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/jibri:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/jibri:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=jitsi
+            TARGET_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -166,10 +166,10 @@ jobs:
             "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./jicofo
           tags: |
-            ${{ secrets.JITSI_REPO }}/jicofo:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/jicofo:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/jicofo:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/jicofo:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=${{ secrets.JITSI_REPO }}
+            TARGET_REPO=${{ secrets.TARGET_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -180,10 +180,10 @@ jobs:
         with:
           context: ./jicofo
           tags: |
-            jitsi/jicofo:${{ needs.version.outputs.base }}
-            jitsi/jicofo:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/jicofo:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/jicofo:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=jitsi
+            TARGET_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -210,10 +210,10 @@ jobs:
             "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./jigasi
           tags: |
-            ${{ secrets.JITSI_REPO }}/jigasi:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/jigasi:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/jigasi:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/jigasi:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=${{ secrets.JITSI_REPO }}
+            TARGET_REPO=${{ secrets.TARGET_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -224,10 +224,10 @@ jobs:
         with:
           context: ./jigasi
           tags: |
-            jitsi/jigasi:${{ needs.version.outputs.base }}
-            jitsi/jigasi:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/jigasi:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/jigasi:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=jitsi
+            TARGET_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -254,10 +254,10 @@ jobs:
             "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./jvb
           tags: |
-            ${{ secrets.JITSI_REPO }}/jvb:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/jvb:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/jvb:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/jvb:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=${{ secrets.JITSI_REPO }}
+            TARGET_REPO=${{ secrets.TARGET_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -268,10 +268,10 @@ jobs:
         with:
           context: ./jvb
           tags: |
-            jitsi/jvb:${{ needs.version.outputs.base }}
-            jitsi/jvb:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/jvb:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/jvb:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=jitsi
+            TARGET_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -298,10 +298,10 @@ jobs:
             "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./prosody
           tags: |
-            ${{ secrets.JITSI_REPO }}/prosody:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/prosody:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/prosody:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/prosody:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=${{ secrets.JITSI_REPO }}
+            TARGET_REPO=${{ secrets.TARGET_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -312,10 +312,10 @@ jobs:
         with:
           context: ./prosody
           tags: |
-            jitsi/prosody:${{ needs.version.outputs.base }}
-            jitsi/prosody:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/prosody:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/prosody:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=jitsi
+            TARGET_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -342,10 +342,10 @@ jobs:
             "github_token=${{ secrets.GITHUB_TOKEN }}"
           context: ./web
           tags: |
-            ${{ secrets.JITSI_REPO }}/web:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/web:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/web:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/web:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=${{ secrets.JITSI_REPO }}
+            TARGET_REPO=${{ secrets.TARGET_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -356,10 +356,10 @@ jobs:
         with:
           context: ./web
           tags: |
-            jitsi/web:${{ needs.version.outputs.base }}
-            jitsi/web:${{ needs.version.outputs.date }}
+            ${{ secrets.TARGET_REPO }}/web:${{ needs.version.outputs.base }}
+            ${{ secrets.TARGET_REPO }}/web:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=jitsi
+            TARGET_REPO=jitsi
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
