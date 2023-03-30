@@ -10,16 +10,16 @@ RUN apt-dpkg-wrap apt-get update && \
     apt-dpkg-wrap apt-get install -y apt-transport-https apt-utils ca-certificates gnupg wget
 
 RUN case ${TARGETPLATFORM} in \
-         "linux/amd64")  S6_ARCH=amd64  ;; \
-         "linux/arm64")  S6_ARCH=aarch64  ;; \
-         "linux/s390x")  S6_ARCH=s390x  ;; \
+         "linux/amd64")  TPL_ARCH=amd64  ;; \
+         "linux/arm64")  TPL_ARCH=arm64  ;; \
+         "linux/s390x")  TPL_ARCH=s390x  ;; \
     esac && \
     wget -qO /usr/bin/tpl https://github.com/rwolke/tpl/releases/download/v0.0.1/tpl-linux-${TPL_ARCH}
 
 RUN case ${TARGETPLATFORM} in \
-         "linux/amd64")  TPL_ARCH=amd64  ;; \
-         "linux/arm64")  TPL_ARCH=arm64  ;; \
-         "linux/s390x")  TPL_ARCH=s390x  ;; \
+         "linux/amd64")  S6_ARCH=amd64  ;; \
+         "linux/arm64")  S6_ARCH=aarch64  ;; \
+         "linux/s390x")  S6_ARCH=s390x  ;; \
     esac && \
     wget -qO - https://github.com/just-containers/s6-overlay/releases/download/v3.1.4.1/s6-overlay-${S6_ARCH}.tar.xz | tar xf - -C /
 
