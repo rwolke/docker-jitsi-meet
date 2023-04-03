@@ -24,23 +24,22 @@ RUN apt-dpkg-wrap apt-get update && \
 COPY prosody.pub /
 
 RUN mkdir -p /prosody/{src,dst} && \
-    wget -qO /prosody/src/prosody-${PROSODY_VERSION}.tar.gz https://prosody.im/downloads/source/prosody-${PROSODY_VERSION}.tar.gz && \
-    wget -qO /prosody/src/prosody-${PROSODY_VERSION}.tar.gz.asc https://prosody.im/downloads/source/prosody-${PROSODY_VERSION}.tar.gz.asc && \
+    wget -qO /prosody/src/prosody-0.12.3.tar.gz https://prosody.im/downloads/source/prosody-0.12.3.tar.gz && \
+    wget -qO /prosody/src/prosody-0.12.3.tar.gz.asc https://prosody.im/downloads/source/prosody-0.12.3.tar.gz.asc && \
     gpg --import /prosody.pub && \
-    gpg --verify /prosody/src/prosody-${PROSODY_VERSION}.tar.gz.asc /prosody/src/prosody-${PROSODY_VERSION}.tar.gz && \
+    gpg --verify /prosody/src/prosody-0.12.3.tar.gz.asc /prosody/src/prosody-0.12.3.tar.gz && \
     cd /prosody/src && \
-    tar xf prosody-${PROSODY_VERSION}.tar.gz && \
-    LUA_VERS=${LUA_VERSION:=5.4} && \
-    dest=/usr && \
+    tar xf prosody-0.12.3.tar.gz && \
+    cd prosody-0.12.3 && \
     ./configure \
-        --prefix=${dest} \
+        --prefix=/usr \
         --sysconfdir=/etc/prosody \
         --ostype=debian \
-        --lua-version=${LUA_VERS} \
-        --runwith=/usr/bin/lua${LUA_VERS} \
-        --lua-suffix=${LUA_VERS} \
+        --lua-version=5.4 \
+        --runwith=/usr/bin/lua5.4 \
+        --lua-suffix=5.4 \
         --with-lua=/usr/bin \
-        --with-lua-include=/usr/include/lua${LUA_VERS} \
+        --with-lua-include=/usr/include/lua5.4 \
         --no-example-certs && \
     make clean && \
     DESTDIR=/prosody/dst make install
