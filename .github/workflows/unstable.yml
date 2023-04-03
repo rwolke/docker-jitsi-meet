@@ -118,6 +118,7 @@ jobs:
 
   jibri:
     runs-on: ubuntu-latest
+    if: inputs.force_jibri != null
     needs: [version, base-java]
     steps:
       - name: Check out code
