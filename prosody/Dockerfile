@@ -23,9 +23,10 @@ RUN apt-dpkg-wrap apt-get update && \
 
 COPY prosody.pub /
 
-RUN mkdir -p /prosody/{src,dst} && \
-    wget -qO /prosody/src/prosody-0.12.3.tar.gz https://prosody.im/downloads/source/prosody-0.12.3.tar.gz && \
-    wget -qO /prosody/src/prosody-0.12.3.tar.gz.asc https://prosody.im/downloads/source/prosody-0.12.3.tar.gz.asc && \
+RUN mkdir -p /prosody/src && \
+    mkdir -p /prosody/dest && \
+    wget -vO /prosody/src/prosody-0.12.3.tar.gz https://prosody.im/downloads/source/prosody-0.12.3.tar.gz && \
+    wget -vO /prosody/src/prosody-0.12.3.tar.gz.asc https://prosody.im/downloads/source/prosody-0.12.3.tar.gz.asc && \
     gpg --import /prosody.pub && \
     gpg --verify /prosody/src/prosody-0.12.3.tar.gz.asc /prosody/src/prosody-0.12.3.tar.gz && \
     cd /prosody/src && \
@@ -42,7 +43,7 @@ RUN mkdir -p /prosody/{src,dst} && \
         --with-lua-include=/usr/include/lua5.4 \
         --no-example-certs && \
     make clean && \
-    DESTDIR=/prosody/dst make install
+    DESTDIR=/prosody/dest make install
     
 FROM ${JITSI_REPO}/base:${BASE_TAG}
 
@@ -88,7 +89,7 @@ RUN wget -qO /etc/apt/trusted.gpg.d/prosody.gpg https://prosody.im/files/prosody
 
 COPY rootfs/ /
 
-COPY --from=builder /prosody/dst/ /
+COPY --from=builder /prosody/dest/ /
 
 COPY --from=builder /usr/local/lib/lua/5.4 /usr/local/lib/lua/5.4
 COPY --from=builder /usr/local/share/lua/5.4 /usr/local/share/lua/5.4
