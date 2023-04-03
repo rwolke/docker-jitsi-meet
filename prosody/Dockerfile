@@ -78,6 +78,7 @@ RUN wget -qO /etc/apt/trusted.gpg.d/prosody.gpg https://prosody.im/files/prosody
     rm -rf /tmp/pkg /var/cache/apt && \
     apt-cleanup && \
     rm -rf /etc/prosody && \
+    mkdir -p /usr/share/lua/5.4 && \
     mv /usr/share/lua/5.3/inspect.lua /usr/share/lua/5.4/ && \
     rm -rf /usr/lib/lua/{5.1,5.2,5.3} && \
     rm -rf /usr/share/lua/{5.1,5.2,5.3} && \
