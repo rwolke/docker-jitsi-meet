@@ -1,5 +1,6 @@
 ARG JITSI_REPO=jitsi
 ARG BASE_TAG=latest
+ARG PROSODY_VERSION=0.12.3
 
 FROM ${JITSI_REPO}/base:${BASE_TAG} as builder
 
@@ -10,6 +11,7 @@ RUN apt-dpkg-wrap apt-get update && \
       liblua5.4-dev \
       libreadline-dev \
       git \
+      gnupg \
       unzip \
       wget && \
     mkdir /tmp/luarocks && \
@@ -19,6 +21,30 @@ RUN apt-dpkg-wrap apt-get update && \
     luarocks install lua-cjson 2.1.0-1 && \
     luarocks install net-url 0.9-1
 
+COPY prosody.pub /
+
+RUN mkdir -p /prosody/{src,dst} && \
+    wget -qO /prosody/src/prosody-${PROSODY_VERSION}.tar.gz https://prosody.im/downloads/source/prosody-${PROSODY_VERSION}.tar.gz && \
+    wget -qO /prosody/src/prosody-${PROSODY_VERSION}.tar.gz.asc https://prosody.im/downloads/source/prosody-${PROSODY_VERSION}.tar.gz.asc && \
+    gpg --import /prosody.pub && \
+    gpg --verify /prosody/src/prosody-${PROSODY_VERSION}.tar.gz.asc /prosody/src/prosody-${PROSODY_VERSION}.tar.gz && \
+    cd /prosody/src && \
+    tar xf prosody-${PROSODY_VERSION}.tar.gz && \
+    LUA_VERS=${LUA_VERSION:=5.4} && \
+    dest=/usr && \
+    ./configure \
+        --prefix=${dest} \
+        --sysconfdir=/etc/prosody \
+        --ostype=debian \
+        --lua-version=${LUA_VERS} \
+        --runwith=/usr/bin/lua${LUA_VERS} \
+        --lua-suffix=${LUA_VERS} \
+        --with-lua=/usr/bin \
+        --with-lua-include=/usr/include/lua${LUA_VERS} \
+        --no-example-certs && \
+    make clean && \
+    DESTDIR=/prosody/dst make install
+    
 FROM ${JITSI_REPO}/base:${BASE_TAG}
 
 LABEL org.opencontainers.image.title="Prosody IM"
@@ -62,6 +88,8 @@ RUN wget -qO /etc/apt/trusted.gpg.d/prosody.gpg https://prosody.im/files/prosody
     rm -rf prosody-mod-auth-matrix-user-verification-$VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN v$VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN.tar.gz
 
 COPY rootfs/ /
+
+COPY --from=builder /prosody/dst/ /
 
 COPY --from=builder /usr/local/lib/lua/5.4 /usr/local/lib/lua/5.4
 COPY --from=builder /usr/local/share/lua/5.4 /usr/local/share/lua/5.4
