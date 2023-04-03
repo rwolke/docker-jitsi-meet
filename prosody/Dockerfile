@@ -10,6 +10,8 @@ RUN apt-dpkg-wrap apt-get update && \
       lua5.4 \
       liblua5.4-dev \
       libreadline-dev \
+      libicu-dev \
+      libssl-dev \
       git \
       gnupg \
       unzip \
