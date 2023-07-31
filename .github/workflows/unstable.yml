@@ -141,7 +141,7 @@ jobs:
             ${{ secrets.JITSI_REPO }}/base-java:${{ needs.version.outputs.base }}
             ${{ secrets.JITSI_REPO }}/base-java:${{ needs.version.outputs.date }}
           build-args: |
-            JITSI_REPO=jitsi
+            JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -192,7 +192,7 @@ jobs:
             ${{ secrets.JITSI_REPO }}/jibri:${{ needs.version.outputs.date }}
             ${{ secrets.JITSI_REPO }}/jibri:${{ needs.version.outputs.jibri_version }}
           build-args: |
-            JITSI_REPO=jitsi
+            JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -242,7 +242,7 @@ jobs:
             ${{ secrets.JITSI_REPO }}/jicofo:${{ needs.version.outputs.date }}
             ${{ secrets.JITSI_REPO }}/jicofo:${{ needs.version.outputs.jicofo_version }}
           build-args: |
-            JITSI_REPO=jitsi
+            JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -292,7 +292,7 @@ jobs:
             ${{ secrets.JITSI_REPO }}/jigasi:${{ needs.version.outputs.date }}
             ${{ secrets.JITSI_REPO }}/jigasi:${{ needs.version.outputs.jigasi_version }}
           build-args: |
-            JITSI_REPO=jitsi
+            JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -342,7 +342,7 @@ jobs:
             ${{ secrets.JITSI_REPO }}/jvb:${{ needs.version.outputs.date }}
             ${{ secrets.JITSI_REPO }}/jvb:${{ needs.version.outputs.jvb_version }}
           build-args: |
-            JITSI_REPO=jitsi
+            JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -392,7 +392,7 @@ jobs:
             ${{ secrets.JITSI_REPO }}/prosody:${{ needs.version.outputs.date }}
             ${{ secrets.JITSI_REPO }}/prosody:${{ needs.version.outputs.prosody_version }}
           build-args: |
-            JITSI_REPO=jitsi
+            JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
@@ -442,7 +442,7 @@ jobs:
             ${{ secrets.JITSI_REPO }}/web:${{ needs.version.outputs.date }}
             ${{ secrets.JITSI_REPO }}/web:${{ needs.version.outputs.web_version }}
           build-args: |
-            JITSI_REPO=jitsi
+            JITSI_REPO=${{ secrets.JITSI_REPO }}
             BASE_TAG=${{ needs.version.outputs.base }}
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
