@@ -1,8 +1,11 @@
+{{ $C2S_REQUIRE_ENCRYPTION := .Env.PROSODY_C2S_REQUIRE_ENCRYPTION | default "1" | toBool -}}
 {{ $ENABLE_AUTH := .Env.ENABLE_AUTH | default "0" | toBool -}}
+{{ $ENABLE_VISITORS := .Env.ENABLE_VISITORS | default "0" | toBool -}}
 {{ $AUTH_TYPE := .Env.AUTH_TYPE | default "internal" -}}
 {{ $PROSODY_AUTH_TYPE := .Env.PROSODY_AUTH_TYPE | default $AUTH_TYPE -}}
 {{ $ENABLE_GUEST_DOMAIN := and $ENABLE_AUTH (.Env.ENABLE_GUESTS | default "0" | toBool) -}}
 {{ $ENABLE_RECORDING := .Env.ENABLE_RECORDING | default "0" | toBool -}}
+{{ $ENABLE_TRANSCRIPTIONS := .Env.ENABLE_TRANSCRIPTIONS | default "0" | toBool -}}
 {{ $JIBRI_XMPP_USER := .Env.JIBRI_XMPP_USER | default "jibri" -}}
 {{ $JIGASI_XMPP_USER := .Env.JIGASI_XMPP_USER | default "jigasi" -}}
 {{ $JVB_AUTH_USER := .Env.JVB_AUTH_USER | default "jvb" -}}
@@ -12,6 +15,7 @@
 {{ $JWT_ENABLE_DOMAIN_VERIFICATION := .Env.JWT_ENABLE_DOMAIN_VERIFICATION | default "false" | toBool -}}
 {{ $MATRIX_UVS_ISSUER := .Env.MATRIX_UVS_ISSUER | default "issuer" -}}
 {{ $MATRIX_UVS_SYNC_POWER_LEVELS := .Env.MATRIX_UVS_SYNC_POWER_LEVELS | default "0" | toBool -}}
+{{ $MATRIX_LOBBY_BYPASS := .Env.MATRIX_LOBBY_BYPASS | default "0" | toBool -}}
 {{ $JWT_TOKEN_AUTH_MODULE := .Env.JWT_TOKEN_AUTH_MODULE | default "token_verification" -}}
 {{ $ENABLE_LOBBY := .Env.ENABLE_LOBBY | default "true" | toBool -}}
 {{ $ENABLE_AV_MODERATION := .Env.ENABLE_AV_MODERATION | default "true" | toBool -}}
@@ -20,8 +24,11 @@
 {{ $ENABLE_XMPP_WEBSOCKET := .Env.ENABLE_XMPP_WEBSOCKET | default "1" | toBool -}}
 {{ $ENABLE_JAAS_COMPONENTS := .Env.ENABLE_JAAS_COMPONENTS | default "0" | toBool -}}
 {{ $ENABLE_RATE_LIMITS := .Env.PROSODY_ENABLE_RATE_LIMITS | default "0" | toBool -}}
+{{ $GUEST_AUTH_TYPE := .Env.PROSODY_GUEST_AUTH_TYPE | default "jitsi-anonymous" -}}
 {{ $PUBLIC_URL := .Env.PUBLIC_URL | default "https://localhost:8443" -}}
 {{ $PUBLIC_URL_DOMAIN := $PUBLIC_URL | trimPrefix "https://" | trimSuffix "/" -}}
+{{ $STUN_HOST := .Env.STUN_HOST | default "" -}}
+{{ $STUN_PORT := .Env.STUN_PORT | default "443" -}}
 {{ $TURN_HOST := .Env.TURN_HOST | default "" -}}
 {{ $TURN_HOSTS := splitList "," $TURN_HOST -}}
 {{ $TURN_PORT := .Env.TURN_PORT | default "443" -}}
@@ -79,12 +86,15 @@ http_default_host = "{{ $XMPP_DOMAIN }}"
 external_service_secret = "{{.Env.TURN_CREDENTIALS}}";
 {{- end }}
 
-{{ if or .Env.TURN_HOST .Env.TURNS_HOST -}}
+{{ if or .Env.STUN_HOST .Env.TURN_HOST .Env.TURNS_HOST -}}
 external_services = {
-  {{ if $TURN_HOST -}}
+  {{- if $STUN_HOST }}
+        { type = "stun", host = "{{ $STUN_HOST }}", port = {{ $STUN_PORT }}, transport = "udp" }
+  {{- end }}
+  {{- if $TURN_HOST -}}
     {{- range $idx1, $host := $TURN_HOSTS -}}
       {{- range $idx2, $transport := $TURN_TRANSPORTS -}}
-        {{- if or $idx1 $idx2 -}},{{- end }}
+        {{- if or $STUN_HOST $idx1 $idx2 -}},{{- end }}
         { type = "turn", host = "{{ $host }}", port = {{ $TURN_PORT }}, transport = "{{ $transport }}", secret = true, ttl = 86400, algorithm = "turn" }
       {{- end -}}
     {{- end -}}
@@ -92,7 +102,7 @@ external_services = {
 
   {{- if $TURNS_HOST -}}
     {{- range $idx, $host := $TURNS_HOSTS -}}
-        {{- if or $TURN_HOST $idx -}},{{- end }}
+        {{- if or $STUN_HOST $TURN_HOST $idx -}},{{- end }}
         { type = "turns", host = "{{ $host }}", port = {{ $TURNS_PORT }}, transport = "tcp", secret = true, ttl = 86400, algorithm = "turn" }
     {{- end }}
   {{- end }}
@@ -110,10 +120,16 @@ asap_accepted_audiences = { "{{ join "\",\"" (splitList "," .Env.JWT_ACCEPTED_AU
 consider_bosh_secure = true;
 consider_websocket_secure = true;
 
+{{ if $ENABLE_XMPP_WEBSOCKET }}
+smacks_max_unacked_stanzas = 5;
+smacks_hibernation_time = 60;
+smacks_max_hibernated_sessions = 1;
+smacks_max_old_sessions = 1;
+{{ end }}
+
 {{ if $ENABLE_JAAS_COMPONENTS }}
 VirtualHost "jigasi.meet.jitsi"
     modules_enabled = {
-      "ping";
       "bosh";
       "muc_password_check";
     }
@@ -179,8 +195,6 @@ VirtualHost "{{ $XMPP_DOMAIN }}"
         "websocket";
         "smacks"; -- XEP-0198: Stream Management
         {{ end }}
-        "pubsub";
-        "ping";
         "speakerstats";
         "conference_duration";
         "room_metadata";
@@ -200,7 +214,7 @@ VirtualHost "{{ $XMPP_DOMAIN }}"
         "av_moderation";
         {{ end }}
         {{ if .Env.XMPP_MODULES }}
-        "{{ join "\";\n\"" (splitList "," .Env.XMPP_MODULES) }}";
+        "{{ join "\";\n        \"" (splitList "," .Env.XMPP_MODULES) }}";
         {{ end }}
         {{ if and $ENABLE_AUTH (eq $PROSODY_AUTH_TYPE "ldap") }}
         "auth_cyrus";
@@ -208,10 +222,13 @@ VirtualHost "{{ $XMPP_DOMAIN }}"
         {{ if $PROSODY_RESERVATION_ENABLED }}
         "reservations";
         {{ end }}
+        {{ if $ENABLE_VISITORS }}
+        "visitors";
+        {{ end }}
     }
 
     main_muc = "{{ $XMPP_MUC_DOMAIN }}"
-
+    room_metadata_component = "metadata.{{ $XMPP_DOMAIN }}"
     {{ if $ENABLE_LOBBY }}
     lobby_muc = "lobby.{{ $XMPP_DOMAIN }}"
     {{ if $ENABLE_RECORDING }}
@@ -238,13 +255,30 @@ VirtualHost "{{ $XMPP_DOMAIN }}"
     av_moderation_component = "avmoderation.{{ $XMPP_DOMAIN }}"
     {{ end }}
 
-    c2s_require_encryption = false
+    c2s_require_encryption = {{ $C2S_REQUIRE_ENCRYPTION }}
+
+    {{ if $ENABLE_VISITORS -}}
+    visitors_ignore_list = { "{{ $XMPP_RECORDER_DOMAIN }}" }
+    {{ end }}
+
+    {{ if .Env.XMPP_CONFIGURATION -}}
+    {{ join "\n    " (splitList "," .Env.XMPP_CONFIGURATION) }}
+    {{ end -}}
 
 {{ if $ENABLE_GUEST_DOMAIN }}
 VirtualHost "{{ $XMPP_GUEST_DOMAIN }}"
-    authentication = "jitsi-anonymous"
+    authentication = "{{ $GUEST_AUTH_TYPE }}"
+    modules_enabled = {
+        {{ if $ENABLE_XMPP_WEBSOCKET }}
+        "smacks"; -- XEP-0198: Stream Management
+        {{ end }}
+    }
 
-    c2s_require_encryption = false
+    c2s_require_encryption = {{ $C2S_REQUIRE_ENCRYPTION }}
+    {{ if $ENABLE_VISITORS }}
+    allow_anonymous_s2s = true
+    {{ end }}
+
 {{ end }}
 
 VirtualHost "{{ $XMPP_AUTH_DOMAIN }}"
@@ -260,7 +294,7 @@ VirtualHost "{{ $XMPP_AUTH_DOMAIN }}"
 {{ if $ENABLE_RECORDING }}
 VirtualHost "{{ $XMPP_RECORDER_DOMAIN }}"
     modules_enabled = {
-      "ping";
+      "smacks";
     }
     authentication = "internal_hashed"
 {{ end }}
@@ -268,14 +302,15 @@ VirtualHost "{{ $XMPP_RECORDER_DOMAIN }}"
 Component "{{ $XMPP_INTERNAL_MUC_DOMAIN }}" "muc"
     storage = "memory"
     modules_enabled = {
-        "ping";
         {{ if .Env.XMPP_INTERNAL_MUC_MODULES -}}
         "{{ join "\";\n\"" (splitList "," .Env.XMPP_INTERNAL_MUC_MODULES) }}";
         {{ end -}}
     }
     restrict_room_creation = true
+    muc_filter_whitelist="{{ $XMPP_AUTH_DOMAIN }}"
     muc_room_locking = false
     muc_room_default_public_jids = true
+    muc_room_cache_size = 1000
 
 Component "{{ $XMPP_MUC_DOMAIN }}" "muc"
     restrict_room_creation = true
@@ -283,7 +318,7 @@ Component "{{ $XMPP_MUC_DOMAIN }}" "muc"
     modules_enabled = {
         "muc_meeting_id";
         {{ if .Env.XMPP_MUC_MODULES -}}
-        "{{ join "\";\n\"" (splitList "," .Env.XMPP_MUC_MODULES) }}";
+        "{{ join "\";\n        \"" (splitList "," .Env.XMPP_MUC_MODULES) }}";
         {{ end -}}
         {{ if and $ENABLE_AUTH (or (eq $PROSODY_AUTH_TYPE "jwt") (eq $PROSODY_AUTH_TYPE "hybrid_matrix_token")) -}}
         "{{ $JWT_TOKEN_AUTH_MODULE }}";
@@ -293,6 +328,9 @@ Component "{{ $XMPP_MUC_DOMAIN }}" "muc"
         {{ end -}}
         {{ if and $ENABLE_AUTH (eq $PROSODY_AUTH_TYPE "hybrid_matrix_token") $MATRIX_UVS_SYNC_POWER_LEVELS -}}
         "matrix_affiliation";
+        {{ end -}}
+        {{ if and $ENABLE_AUTH (eq $PROSODY_AUTH_TYPE "hybrid_matrix_token") $MATRIX_LOBBY_BYPASS -}}
+        "matrix_lobby_bypass";
         {{ end -}}
         {{ if not $DISABLE_POLLS -}}
         "polls";
@@ -312,17 +350,17 @@ Component "{{ $XMPP_MUC_DOMAIN }}" "muc"
 
     {{ if $ENABLE_RATE_LIMITS -}}
     -- Max allowed join/login rate in events per second.
-	rate_limit_login_rate = {{ $RATE_LIMIT_LOGIN_RATE }};
-	-- The rate to which sessions from IPs exceeding the join rate will be limited, in bytes per second.
-	rate_limit_session_rate = {{ $RATE_LIMIT_SESSION_RATE }};
-	-- The time in seconds, after which the limit for an IP address is lifted.
-	rate_limit_timeout = {{ $RATE_LIMIT_TIMEOUT }};
-	-- List of regular expressions for IP addresses that are not limited by this module.
-	rate_limit_whitelist = {
-      "127.0.0.1";
-      {{ range $index, $cidr := (splitList "," $RATE_LIMIT_ALLOW_RANGES) -}}
-      "{{ $cidr }}";
-      {{ end -}}
+    rate_limit_login_rate = {{ $RATE_LIMIT_LOGIN_RATE }};
+    -- The rate to which sessions from IPs exceeding the join rate will be limited, in bytes per second.
+    rate_limit_session_rate = {{ $RATE_LIMIT_SESSION_RATE }};
+    -- The time in seconds, after which the limit for an IP address is lifted.
+    rate_limit_timeout = {{ $RATE_LIMIT_TIMEOUT }};
+    -- List of regular expressions for IP addresses that are not limited by this module.
+    rate_limit_whitelist = {
+        "127.0.0.1";
+{{ range $index, $cidr := (splitList "," $RATE_LIMIT_ALLOW_RANGES) }}
+        "{{ $cidr }}";
+{{ end }}
     };
 
     rate_limit_whitelist_jids = {
@@ -332,20 +370,26 @@ Component "{{ $XMPP_MUC_DOMAIN }}" "muc"
     {{ end -}}
 
 	-- The size of the cache that saves state for IP addresses
-	rate_limit_cache_size = {{ $RATE_LIMIT_CACHE_SIZE }};
+    rate_limit_cache_size = {{ $RATE_LIMIT_CACHE_SIZE }};
 
-    muc_room_cache_size = 1000
+    muc_room_cache_size = 10000
     muc_room_locking = false
     muc_room_default_public_jids = true
     {{ if .Env.XMPP_MUC_CONFIGURATION -}}
-    {{ join "\n" (splitList "," .Env.XMPP_MUC_CONFIGURATION) }}
+    {{ join "\n    " (splitList "," .Env.XMPP_MUC_CONFIGURATION) }}
     {{ end -}}
     {{ if .Env.MAX_PARTICIPANTS }}
     muc_access_whitelist = { "focus@{{ .Env.XMPP_AUTH_DOMAIN }}" }
     muc_max_occupants = "{{ .Env.MAX_PARTICIPANTS }}"
     {{ end }}
     muc_password_whitelist = {
-        "focus@{{ .Env.XMPP_AUTH_DOMAIN }}"
+        "focus@{{ .Env.XMPP_AUTH_DOMAIN }}";
+{{- if $ENABLE_RECORDING }}
+        "{{ $JIBRI_RECORDER_USER }}@{{ $XMPP_RECORDER_DOMAIN }}";
+{{- end }}
+{{- if $ENABLE_TRANSCRIPTIONS }}
+        "{{ $JIGASI_TRANSCRIBER_USER }}@{{ $XMPP_RECORDER_DOMAIN }}";
+{{- end }}
     }
 
 Component "focus.{{ $XMPP_DOMAIN }}" "client_proxy"
@@ -371,11 +415,16 @@ Component "avmoderation.{{ $XMPP_DOMAIN }}" "av_moderation_component"
 Component "lobby.{{ $XMPP_DOMAIN }}" "muc"
     storage = "memory"
     restrict_room_creation = true
+    muc_room_allow_persistent = false
+    muc_room_cache_size = 10000
     muc_room_locking = false
     muc_room_default_public_jids = true
     modules_enabled = {
         {{ if $ENABLE_RATE_LIMITS -}}
         "muc_rate_limit";
+        {{ end -}}
+        {{ if .Env.XMPP_LOBBY_MUC_MODULES -}}
+        "{{ join "\";\n        \"" (splitList "," .Env.XMPP_LOBBY_MUC_MODULES) }}";
         {{ end -}}
     }
 
@@ -385,18 +434,20 @@ Component "lobby.{{ $XMPP_DOMAIN }}" "muc"
 Component "breakout.{{ $XMPP_DOMAIN }}" "muc"
     storage = "memory"
     restrict_room_creation = true
+    muc_room_cache_size = 10000
     muc_room_locking = false
     muc_room_default_public_jids = true
+    muc_room_allow_persistent = false
     modules_enabled = {
         "muc_meeting_id";
-        {{ if $ENABLE_SUBDOMAINS -}}
-        "muc_domain_mapper";
-        {{ end -}}
         {{ if not $DISABLE_POLLS -}}
         "polls";
         {{ end -}}
         {{ if $ENABLE_RATE_LIMITS -}}
         "muc_rate_limit";
+        {{ end -}}
+        {{ if .Env.XMPP_BREAKOUT_MUC_MODULES -}}
+        "{{ join "\";\n        \"" (splitList "," .Env.XMPP_BREAKOUT_MUC_MODULES) }}";
         {{ end -}}
     }
 {{ end }}
@@ -404,3 +455,9 @@ Component "breakout.{{ $XMPP_DOMAIN }}" "muc"
 Component "metadata.{{ $XMPP_DOMAIN }}" "room_metadata_component"
     muc_component = "{{ $XMPP_MUC_DOMAIN }}"
     breakout_rooms_component = "breakout.{{ $XMPP_DOMAIN }}"
+
+
+{{ if $ENABLE_VISITORS }}
+Component "visitors.{{ $XMPP_DOMAIN }}" "visitors_component"
+    auto_allow_visitor_promotion = true
+{{ end }}

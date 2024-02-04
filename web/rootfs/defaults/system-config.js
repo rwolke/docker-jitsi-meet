@@ -1,5 +1,6 @@
-{{ $CONFIG_EXTERNAL_CONNECT := .Env.CONFIG_EXTERNAL_CONNECT | default "false" | toBool -}}
+{{ $BOSH_RELATIVE := .Env.BOSH_RELATIVE | default "false" | toBool -}}
 {{ $ENABLE_AUTH := .Env.ENABLE_AUTH | default "false" | toBool -}}
+{{ $ENABLE_AUTH_DOMAIN := .Env.ENABLE_AUTH_DOMAIN | default "true" | toBool -}}
 {{ $ENABLE_GUESTS := .Env.ENABLE_GUESTS | default "false" | toBool -}}
 {{ $ENABLE_SUBDOMAINS := .Env.ENABLE_SUBDOMAINS | default "true" | toBool -}}
 {{ $ENABLE_XMPP_WEBSOCKET := .Env.ENABLE_XMPP_WEBSOCKET | default "1" | toBool -}}
@@ -9,11 +10,12 @@
 {{ $XMPP_GUEST_DOMAIN := .Env.XMPP_GUEST_DOMAIN | default "guest.meet.jitsi" -}}
 {{ $XMPP_MUC_DOMAIN := .Env.XMPP_MUC_DOMAIN | default "muc.meet.jitsi" -}}
 {{ $XMPP_MUC_DOMAIN_PREFIX := (split "." $XMPP_MUC_DOMAIN)._0  -}}
+{{ $JVB_PREFER_SCTP := .Env.JVB_PREFER_SCTP | default "false" | toBool -}}
 
 // Jitsi Meet configuration.
 var config = {};
 
-if (!config.hasOwnProperty('hosts')) config.hosts = {};
+config.hosts = {};
 
 config.hosts.domain = '{{ $XMPP_DOMAIN }}';
 config.focusUserJid = 'focus@{{$XMPP_AUTH_DOMAIN}}';
@@ -37,11 +39,25 @@ config.hosts.muc = '{{ $XMPP_MUC_DOMAIN }}';
 // When using authentication, domain for guest users.
 config.hosts.anonymousdomain = '{{ $XMPP_GUEST_DOMAIN }}';
 {{ end -}}
+{{ if $ENABLE_AUTH_DOMAIN -}}
 // Domain for authenticated users. Defaults to <domain>.
 config.hosts.authdomain = '{{ $XMPP_DOMAIN }}';
 {{ end -}}
+{{ end -}}
 
+{{ if $BOSH_RELATIVE -}}
+{{ if $ENABLE_SUBDOMAINS -}}
+config.bosh = '/'+ subdir + 'http-bind';
+{{ else -}}
 config.bosh = '/http-bind';
+{{ end -}}
+{{ else -}}
+{{ if $ENABLE_SUBDOMAINS -}}
+config.bosh = 'https://{{ $PUBLIC_URL_DOMAIN}}/' + subdir + 'http-bind';
+{{ else -}}
+config.bosh = 'https://{{ $PUBLIC_URL_DOMAIN}}/http-bind';
+{{ end -}}
+{{ end -}}
 
 {{ if $ENABLE_XMPP_WEBSOCKET -}}
 {{ if $ENABLE_SUBDOMAINS -}}
@@ -51,10 +67,8 @@ config.websocket = 'wss://{{ $PUBLIC_URL_DOMAIN }}/xmpp-websocket';
 {{ end -}}
 {{ end -}}
 
-{{ if $CONFIG_EXTERNAL_CONNECT -}}
-{{ if $ENABLE_SUBDOMAINS -}}
-config.externalConnectUrl = '/' + subdir + 'http-pre-bind';
-{{ else -}}
-config.externalConnectUrl = '/http-pre-bind';
-{{ end -}}
+{{ if $JVB_PREFER_SCTP -}}
+config.bridgeChannel = {
+    preferSctp: true
+};
 {{ end -}}
