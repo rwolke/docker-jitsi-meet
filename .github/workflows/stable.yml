@@ -84,19 +84,6 @@ jobs:
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Dryrun
-        uses: docker/build-push-action@v2
-        if: ${{ github.event_name == 'pull_request' }}
-        with:
-          context: ./base
-          tags: |
-            ${{ secrets.JITSI_REPO }}/base:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/base:${{ needs.version.outputs.version }}
-          build-args: |
-            JITSI_RELEASE=stable
-          platforms: linux/amd64,linux/s390x
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
   base-java:
     runs-on: ubuntu-latest
@@ -122,20 +109,6 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
-          context: ./base-java
-          tags: |
-            ${{ secrets.JITSI_REPO }}/base-java:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/base-java:${{ needs.version.outputs.version }}
-          build-args: |
-            JITSI_REPO=${{ secrets.JITSI_REPO }}
-            BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/s390x
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - name: Dryrun
-        uses: docker/build-push-action@v2
-        if: ${{ github.event_name == 'pull_request' }}
-        with:
           context: ./base-java
           tags: |
             ${{ secrets.JITSI_REPO }}/base-java:${{ needs.version.outputs.base }}
@@ -182,21 +155,6 @@ jobs:
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Dryrun
-        uses: docker/build-push-action@v2
-        if: ${{ github.event_name == 'pull_request' }}
-        with:
-          context: ./jibri
-          tags: |
-            ${{ secrets.JITSI_REPO }}/jibri:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/jibri:${{ needs.version.outputs.version }}
-            ${{ secrets.JITSI_REPO }}/jibri:${{ needs.version.outputs.jibri_version }}
-          build-args: |
-            JITSI_REPO=${{ secrets.JITSI_REPO }}
-            BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/s390x
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
   jicofo:
     runs-on: ubuntu-latest
@@ -221,21 +179,6 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
-          context: ./jicofo
-          tags: |
-            ${{ secrets.JITSI_REPO }}/jicofo:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/jicofo:${{ needs.version.outputs.version }}
-            ${{ secrets.JITSI_REPO }}/jicofo:${{ needs.version.outputs.jicofo_version }}
-          build-args: |
-            JITSI_REPO=${{ secrets.JITSI_REPO }}
-            BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/s390x
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - name: Dryrun
-        uses: docker/build-push-action@v2
-        if: ${{ github.event_name == 'pull_request' }}
-        with:
           context: ./jicofo
           tags: |
             ${{ secrets.JITSI_REPO }}/jicofo:${{ needs.version.outputs.base }}
@@ -282,21 +225,6 @@ jobs:
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Dryrun
-        uses: docker/build-push-action@v2
-        if: ${{ github.event_name == 'pull_request' }}
-        with:
-          context: ./jigasi
-          tags: |
-            ${{ secrets.JITSI_REPO }}/jigasi:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/jigasi:${{ needs.version.outputs.version }}
-            ${{ secrets.JITSI_REPO }}/jigasi:${{ needs.version.outputs.jigasi_version }}
-          build-args: |
-            JITSI_REPO=${{ secrets.JITSI_REPO }}
-            BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/s390x
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
   jvb:
     runs-on: ubuntu-latest
@@ -321,21 +249,6 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
-          context: ./jvb
-          tags: |
-            ${{ secrets.JITSI_REPO }}/jvb:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/jvb:${{ needs.version.outputs.version }}
-            ${{ secrets.JITSI_REPO }}/jvb:${{ needs.version.outputs.jvb_version }}
-          build-args: |
-            JITSI_REPO=${{ secrets.JITSI_REPO }}
-            BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/s390x
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - name: Dryrun
-        uses: docker/build-push-action@v2
-        if: ${{ github.event_name == 'pull_request' }}
-        with:
           context: ./jvb
           tags: |
             ${{ secrets.JITSI_REPO }}/jvb:${{ needs.version.outputs.base }}
@@ -382,21 +295,6 @@ jobs:
           platforms: linux/amd64,linux/s390x
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Dryrun
-        uses: docker/build-push-action@v2
-        if: ${{ github.event_name == 'pull_request' }}
-        with:
-          context: ./prosody
-          tags: |
-            ${{ secrets.JITSI_REPO }}/prosody:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/prosody:${{ needs.version.outputs.version }}
-            ${{ secrets.JITSI_REPO }}/prosody:${{ needs.version.outputs.prosody_version }}
-          build-args: |
-            JITSI_REPO=${{ secrets.JITSI_REPO }}
-            BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/s390x
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
   web:
     runs-on: ubuntu-latest
@@ -421,21 +319,6 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         with:
           push: true
-          context: ./web
-          tags: |
-            ${{ secrets.JITSI_REPO }}/web:${{ needs.version.outputs.base }}
-            ${{ secrets.JITSI_REPO }}/web:${{ needs.version.outputs.version }}
-            ${{ secrets.JITSI_REPO }}/web:${{ needs.version.outputs.web_version }}
-          build-args: |
-            JITSI_REPO=${{ secrets.JITSI_REPO }}
-            BASE_TAG=${{ needs.version.outputs.base }}
-          platforms: linux/amd64,linux/s390x
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - name: Dryrun
-        uses: docker/build-push-action@v2
-        if: ${{ github.event_name == 'pull_request' }}
-        with:
           context: ./web
           tags: |
             ${{ secrets.JITSI_REPO }}/web:${{ needs.version.outputs.base }}
