@@ -1,6 +1,5 @@
 ARG JITSI_REPO=jitsi
 ARG BASE_TAG=latest
-ARG PROSODY_VERSION=0.12.3
 
 FROM ${JITSI_REPO}/base:${BASE_TAG} as builder
 
@@ -10,10 +9,7 @@ RUN apt-dpkg-wrap apt-get update && \
       lua5.4 \
       liblua5.4-dev \
       libreadline-dev \
-      libicu-dev \
-      libssl-dev \
       git \
-      gnupg \
       unzip \
       wget && \
     mkdir /tmp/luarocks && \
@@ -23,30 +19,6 @@ RUN apt-dpkg-wrap apt-get update && \
     luarocks install lua-cjson 2.1.0-1 && \
     luarocks install net-url 0.9-1
 
-COPY prosody.pub /
-
-RUN mkdir -p /prosody/src && \
-    mkdir -p /prosody/dest && \
-    wget -vO /prosody/src/prosody-0.12.3.tar.gz https://prosody.im/downloads/source/prosody-0.12.3.tar.gz && \
-    wget -vO /prosody/src/prosody-0.12.3.tar.gz.asc https://prosody.im/downloads/source/prosody-0.12.3.tar.gz.asc && \
-    gpg --import /prosody.pub && \
-    gpg --verify /prosody/src/prosody-0.12.3.tar.gz.asc /prosody/src/prosody-0.12.3.tar.gz && \
-    cd /prosody/src && \
-    tar xf prosody-0.12.3.tar.gz && \
-    cd prosody-0.12.3 && \
-    ./configure \
-        --prefix=/usr \
-        --sysconfdir=/etc/prosody \
-        --ostype=debian \
-        --lua-version=5.4 \
-        --runwith=/usr/bin/lua5.4 \
-        --lua-suffix=5.4 \
-        --with-lua=/usr/bin \
-        --with-lua-include=/usr/include/lua5.4 \
-        --no-example-certs && \
-    make clean && \
-    DESTDIR=/prosody/dest make install
-    
 FROM ${JITSI_REPO}/base:${BASE_TAG}
 
 LABEL org.opencontainers.image.title="Prosody IM"
@@ -55,11 +27,11 @@ LABEL org.opencontainers.image.url="https://prosody.im/"
 LABEL org.opencontainers.image.source="https://github.com/jitsi/docker-jitsi-meet"
 LABEL org.opencontainers.image.documentation="https://jitsi.github.io/handbook/"
 
-ARG VERSION_JITSI_CONTRIB_PROSODY_PLUGINS="20240117"
+ARG VERSION_JITSI_CONTRIB_PROSODY_PLUGINS="20241008"
 ARG VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN="1.8.0"
 
 RUN wget -qO /etc/apt/trusted.gpg.d/prosody.gpg https://prosody.im/files/prosody-debian-packages.key && \
-    echo "deb http://packages.prosody.im/debian bullseye main" > /etc/apt/sources.list.d/prosody.list && \
+    echo "deb http://packages.prosody.im/debian bookworm main" > /etc/apt/sources.list.d/prosody.list && \
     apt-dpkg-wrap apt-get update && \
     apt-dpkg-wrap apt-get install -y \
       lua5.4 \
@@ -80,12 +52,12 @@ RUN wget -qO /etc/apt/trusted.gpg.d/prosody.gpg https://prosody.im/files/prosody
     rm -rf /tmp/pkg /var/cache/apt && \
     apt-cleanup && \
     rm -rf /etc/prosody && \
-    mkdir -p /usr/share/lua/5.4 && \
     mv /usr/share/lua/5.3/inspect.lua /usr/share/lua/5.4/ && \
     rm -rf /usr/lib/lua/{5.1,5.2,5.3} && \
     rm -rf /usr/share/lua/{5.1,5.2,5.3} && \
     wget -qO /prosody-plugins/mod_auth_cyrus.lua https://hg.prosody.im/prosody-modules/raw-file/65438e4ba563/mod_auth_cyrus/mod_auth_cyrus.lua && \
     wget -qO /prosody-plugins/sasl_cyrus.lua https://hg.prosody.im/prosody-modules/raw-file/65438e4ba563/mod_auth_cyrus/sasl_cyrus.lua  && \
+    wget -qO /prosody-plugins/mod_http_health.lua https://hg.prosody.im/prosody-modules/raw-file/2b80188448d1/mod_http_health/mod_http_health.lua && \
     wget https://github.com/matrix-org/prosody-mod-auth-matrix-user-verification/archive/refs/tags/v$VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN.tar.gz && \
     tar -xf v$VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN.tar.gz && \
     mv prosody-mod-auth-matrix-user-verification-$VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN/mod_auth_matrix_user_verification.lua /prosody-plugins && \
@@ -93,14 +65,11 @@ RUN wget -qO /etc/apt/trusted.gpg.d/prosody.gpg https://prosody.im/files/prosody
     rm -rf prosody-mod-auth-matrix-user-verification-$VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN v$VERSION_MATRIX_USER_VERIFICATION_SERVICE_PLUGIN.tar.gz && \
     wget -q https://github.com/jitsi-contrib/prosody-plugins/archive/refs/tags/v$VERSION_JITSI_CONTRIB_PROSODY_PLUGINS.tar.gz && \
     tar -xf v$VERSION_JITSI_CONTRIB_PROSODY_PLUGINS.tar.gz && \
-    mv prosody-plugins-$VERSION_JITSI_CONTRIB_PROSODY_PLUGINS/auth_hybrid_matrix_token/mod_auth_hybrid_matrix_token.lua /prosody-plugins && \
-    mv prosody-plugins-$VERSION_JITSI_CONTRIB_PROSODY_PLUGINS/auth_hybrid_matrix_token/mod_matrix_affiliation.lua /prosody-plugins && \
-    mv prosody-plugins-$VERSION_JITSI_CONTRIB_PROSODY_PLUGINS/auth_hybrid_matrix_token/mod_matrix_lobby_bypass.lua /prosody-plugins && \
+    mkdir /prosody-plugins-contrib && \
+    cp -a prosody-plugins-$VERSION_JITSI_CONTRIB_PROSODY_PLUGINS/*  /prosody-plugins-contrib && \
     rm -rf prosody-plugins-$VERSION_JITSI_CONTRIB_PROSODY_PLUGINS v$VERSION_JITSI_CONTRIB_PROSODY_PLUGINS.tar.gz
 
 COPY rootfs/ /
-
-COPY --from=builder /prosody/dest/ /
 
 COPY --from=builder /usr/local/lib/lua/5.4 /usr/local/lib/lua/5.4
 COPY --from=builder /usr/local/share/lua/5.4 /usr/local/share/lua/5.4

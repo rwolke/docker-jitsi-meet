@@ -1,7 +1,9 @@
 {{ $ENABLE_AUTH := .Env.ENABLE_AUTH | default "0" | toBool -}}
 {{ $ENABLE_GUEST_DOMAIN := and $ENABLE_AUTH (.Env.ENABLE_GUESTS | default "0" | toBool) -}}
 {{ $ENABLE_RATE_LIMITS := .Env.PROSODY_ENABLE_RATE_LIMITS | default "0" | toBool -}}
+{{ $ENABLE_RECORDING := .Env.ENABLE_RECORDING | default "0" | toBool -}}
 {{ $ENABLE_SUBDOMAINS := .Env.ENABLE_SUBDOMAINS | default "true" | toBool -}}
+{{ $ENABLE_TRANSCRIPTIONS := .Env.ENABLE_TRANSCRIPTIONS | default "0" | toBool -}}
 {{ $ENABLE_XMPP_WEBSOCKET := .Env.ENABLE_XMPP_WEBSOCKET | default "1" | toBool -}}
 {{ $JIBRI_RECORDER_USER := .Env.JIBRI_RECORDER_USER | default "recorder" -}}
 {{ $JIGASI_TRANSCRIBER_USER := .Env.JIGASI_TRANSCRIBER_USER | default "transcriber" -}}
@@ -16,12 +18,13 @@
 {{ $SHARD_NAME := .Env.SHARD | default "default" -}}
 {{ $S2S_PORT := .Env.PROSODY_S2S_PORT | default "5269" -}}
 {{ $TURN_HOST := .Env.TURN_HOST | default "" -}}
-{{ $TURN_HOSTS := splitList "," $TURN_HOST -}}
+{{ $TURN_HOSTS := splitList "," $TURN_HOST | compact -}}
 {{ $TURN_PORT := .Env.TURN_PORT | default "443" -}}
 {{ $TURN_TRANSPORT := .Env.TURN_TRANSPORT | default "tcp" -}}
-{{ $TURN_TRANSPORTS := splitList "," $TURN_TRANSPORT -}}
+{{ $TURN_TRANSPORTS := splitList "," $TURN_TRANSPORT | compact -}}
+{{ $TURN_TTL := .Env.TURN_TTL | default "86400" -}}
 {{ $TURNS_HOST := .Env.TURNS_HOST | default "" -}}
-{{ $TURNS_HOSTS := splitList "," $TURNS_HOST -}}
+{{ $TURNS_HOSTS := splitList "," $TURNS_HOST | compact -}}
 {{ $TURNS_PORT := .Env.TURNS_PORT | default "443" -}}
 {{ $VISITOR_INDEX := .Env.PROSODY_VISITOR_INDEX | default "0" -}}
 {{ $VISITORS_MUC_PREFIX := .Env.PROSODY_VISITORS_MUC_PREFIX | default "muc" -}}
@@ -36,7 +39,7 @@
 {{ $XMPP_SERVER_S2S_PORT := .Env.XMPP_SERVER_S2S_PORT | default $S2S_PORT -}}
 {{ $XMPP_RECORDER_DOMAIN := .Env.XMPP_RECORDER_DOMAIN | default "recorder.meet.jitsi" -}}
 
-plugin_paths = { "/prosody-plugins/", "/prosody-plugins-custom" }
+plugin_paths = { "/prosody-plugins/", "/prosody-plugins-custom", "/prosody-plugins-contrib" }
 
 muc_mapper_domain_base = "v{{ $VISITOR_INDEX }}.{{ $VISITORS_XMPP_DOMAIN }}";
 muc_mapper_domain_prefix = "{{ $XMPP_MUC_DOMAIN_PREFIX }}";
@@ -53,7 +56,7 @@ external_services = {
     {{- range $idx1, $host := $TURN_HOSTS -}}
       {{- range $idx2, $transport := $TURN_TRANSPORTS -}}
         {{- if or $idx1 $idx2 -}},{{- end }}
-        { type = "turn", host = "{{ $host }}", port = {{ $TURN_PORT }}, transport = "{{ $transport }}", secret = true, ttl = 86400, algorithm = "turn" }
+        { type = "turn", host = "{{ $host }}", port = {{ $TURN_PORT }}, transport = "{{ $transport }}", secret = true, ttl = {{ $TURN_TTL }}, algorithm = "turn" }
       {{- end -}}
     {{- end -}}
   {{- end -}}
@@ -61,7 +64,7 @@ external_services = {
   {{- if $TURNS_HOST -}}
     {{- range $idx, $host := $TURNS_HOSTS -}}
         {{- if or $TURN_HOST $idx -}},{{- end }}
-        { type = "turns", host = "{{ $host }}", port = {{ $TURNS_PORT }}, transport = "tcp", secret = true, ttl = 86400, algorithm = "turn" }
+        { type = "turns", host = "{{ $host }}", port = {{ $TURNS_PORT }}, transport = "tcp", secret = true, ttl = {{ $TURN_TTL }}, algorithm = "turn" }
     {{- end }}
   {{- end }}
 };
@@ -98,6 +101,9 @@ s2sout_override = {
 {{ if $ENABLE_GUEST_DOMAIN -}}
     ["{{ $XMPP_GUEST_DOMAIN }}"] = "tcp://{{ $XMPP_SERVER }}:{{ $XMPP_SERVER_S2S_PORT }}";
 {{ end -}}
+{{ if or $ENABLE_RECORDING $ENABLE_TRANSCRIPTIONS -}}
+    ["{{ $XMPP_RECORDER_DOMAIN }}"] = "tcp://{{ $XMPP_SERVER }}:{{ $XMPP_SERVER_S2S_PORT }}";
+{{ end -}}
 }
 
 muc_limit_messages_count = 10;
@@ -118,7 +124,7 @@ VirtualHost 'v{{ $VISITOR_INDEX }}.{{ $VISITORS_XMPP_DOMAIN }}'
       "smacks"; -- XEP-0198: Stream Management
       {{ end -}}
       {{ if .Env.XMPP_MODULES }}
-      "{{ join "\";\n\"" (splitList "," .Env.XMPP_MODULES) }}";
+      "{{ join "\";\n\"" (splitList "," .Env.XMPP_MODULES | compact) }}";
       {{ end }}
     }
     main_muc = '{{ $VISITORS_MUC_PREFIX }}.v{{ $VISITOR_INDEX }}.{{ $VISITORS_XMPP_DOMAIN }}';
@@ -127,10 +133,10 @@ VirtualHost 'v{{ $VISITOR_INDEX }}.{{ $VISITORS_XMPP_DOMAIN }}'
     release_number = "{{ $RELEASE_NUMBER }}"
 
     {{ if .Env.XMPP_CONFIGURATION -}}
-    {{ join "\n    " (splitList "," .Env.XMPP_CONFIGURATION) }}
+    {{ join "\n    " (splitList "," .Env.XMPP_CONFIGURATION | compact) }}
     {{- end }}
 
-VirtualHost '{{ $XMPP_AUTH_DOMAIN}}'
+VirtualHost '{{ $XMPP_AUTH_DOMAIN }}'
     modules_enabled = {
       'limits_exception';
     }
@@ -156,7 +162,7 @@ Component '{{ $VISITORS_MUC_PREFIX }}.v{{ $VISITOR_INDEX }}.{{ $VISITORS_XMPP_DO
         "rate_limit";
         {{ end -}}
         {{ if .Env.XMPP_MUC_MODULES -}}
-        "{{ join "\";\n\"" (splitList "," .Env.XMPP_MUC_MODULES) }}";
+        "{{ join "\";\n\"" (splitList "," .Env.XMPP_MUC_MODULES | compact) }}";
         {{ end -}}
       }
     muc_room_default_presence_broadcast = {
@@ -170,6 +176,8 @@ Component '{{ $VISITORS_MUC_PREFIX }}.v{{ $VISITOR_INDEX }}.{{ $VISITORS_XMPP_DO
     muc_access_whitelist = {
         "{{ $XMPP_DOMAIN }}";
     }
+    muc_tombstones = false
+    muc_room_allow_persistent = false
 
     {{ if $ENABLE_RATE_LIMITS -}}
     -- Max allowed join/login rate in events per second.
@@ -181,15 +189,11 @@ Component '{{ $VISITORS_MUC_PREFIX }}.v{{ $VISITOR_INDEX }}.{{ $VISITORS_XMPP_DO
 	-- List of regular expressions for IP addresses that are not limited by this module.
 	rate_limit_whitelist = {
       "127.0.0.1";
-      {{ range $index, $cidr := (splitList "," $RATE_LIMIT_ALLOW_RANGES) -}}
+      {{ range $index, $cidr := (splitList "," $RATE_LIMIT_ALLOW_RANGES | compact) -}}
       "{{ $cidr }}";
       {{ end -}}
     };
 
-    rate_limit_whitelist_jids = {
-        "{{ $JIBRI_RECORDER_USER }}@{{ $XMPP_RECORDER_DOMAIN }}",
-        "{{ $JIGASI_TRANSCRIBER_USER }}@{{ $XMPP_RECORDER_DOMAIN }}"    
-    }
     {{ end -}}
 
 	-- The size of the cache that saves state for IP addresses
@@ -197,5 +201,5 @@ Component '{{ $VISITORS_MUC_PREFIX }}.v{{ $VISITOR_INDEX }}.{{ $VISITORS_XMPP_DO
 
     muc_rate_joins = 30;
     {{ if .Env.XMPP_MUC_CONFIGURATION -}}
-    {{ join "\n" (splitList "," .Env.XMPP_MUC_CONFIGURATION) }}
+    {{ join "\n" (splitList "," .Env.XMPP_MUC_CONFIGURATION | compact) }}
     {{ end -}}

@@ -62,8 +62,7 @@
 {{ $ENABLE_LOCAL_RECORDING_SELF_START := .Env.ENABLE_LOCAL_RECORDING_SELF_START | default "false" | toBool -}}
 {{ $DISABLE_PROFILE := .Env.DISABLE_PROFILE | default "false" | toBool -}}
 {{ $ROOM_PASSWORD_DIGITS := .Env.ROOM_PASSWORD_DIGITS | default "false" -}}
-{{ $WHITEBOARD_COLLAB_SERVER_PUBLIC_URL := .Env.WHITEBOARD_COLLAB_SERVER_PUBLIC_URL | default "" -}}
-{{ $WHITEBOARD_ENABLED := .Env.WHITEBOARD_ENABLED | default "false" | toBool -}}
+{{ $WHITEBOARD_ENABLED := or (.Env.WHITEBOARD_COLLAB_SERVER_PUBLIC_URL | default "" | toBool) (.Env.WHITEBOARD_COLLAB_SERVER_URL_BASE | default "" | toBool) }}
 {{ $TESTING_AV1_SUPPORT := .Env.TESTING_AV1_SUPPORT | default "false" | toBool -}}
 
 // Video configuration.
@@ -150,9 +149,12 @@ config.etherpad_base = '{{ $PUBLIC_URL }}/etherpad/p/';
 // Recording.
 //
 
-{{ if $ENABLE_RECORDING  -}}
+{{ if or $ENABLE_RECORDING $ENABLE_TRANSCRIPTIONS  -}}
 
 config.hiddenDomain = '{{ $XMPP_RECORDER_DOMAIN }}';
+{{ end -}}
+
+{{ if $ENABLE_RECORDING -}}
 
 config.recordingService = {
     // Whether to enable file recording or not using the "service" defined by the finalizer in Jibri
@@ -225,11 +227,11 @@ config.analytics.matomoSiteID = '{{ .Env.MATOMO_SITE_ID }}';
 
 {{ if .Env.ANALYTICS_SCRIPT_URLS -}}
 // Array of script URLs to load as lib-jitsi-meet "analytics handlers".
-config.analytics.scriptURLs = [ '{{ join "','" (splitList "," .Env.ANALYTICS_SCRIPT_URLS) }}' ];
+config.analytics.scriptURLs = [ '{{ join "','" (splitList "," .Env.ANALYTICS_SCRIPT_URLS | compact) }}' ];
 {{ end -}}
 
 {{ if .Env.ANALYTICS_WHITELISTED_EVENTS -}}
-config.analytics.whiteListedEvents = [ '{{ join "','" (splitList "," .Env.ANALYTICS_WHITELISTED_EVENTS) }}' ];
+config.analytics.whiteListedEvents = [ '{{ join "','" (splitList "," .Env.ANALYTICS_WHITELISTED_EVENTS | compact) }}' ];
 {{ end -}}
 
 
@@ -297,7 +299,7 @@ config.prejoinConfig = {
 
 // List of buttons to hide from the extra join options dropdown on prejoin screen.
 {{ if .Env.HIDE_PREJOIN_EXTRA_BUTTONS -}}
-config.prejoinConfig.hideExtraJoinButtons = [ '{{ join "','" (splitList "," .Env.HIDE_PREJOIN_EXTRA_BUTTONS) }}' ];
+config.prejoinConfig.hideExtraJoinButtons = [ '{{ join "','" (splitList "," .Env.HIDE_PREJOIN_EXTRA_BUTTONS | compact) }}' ];
 {{ end -}}
 
 // Welcome page.
@@ -520,12 +522,12 @@ config.disablePolls = {{ $DISABLE_POLLS }};
 
 // Configure toolbar buttons
 {{ if .Env.TOOLBAR_BUTTONS -}}
-config.toolbarButtons = [ '{{ join "','" (splitList "," .Env.TOOLBAR_BUTTONS) }}' ];
+config.toolbarButtons = [ '{{ join "','" (splitList "," .Env.TOOLBAR_BUTTONS | compact) }}' ];
 {{ end -}}
 
 // Hides the buttons at pre-join screen
 {{ if .Env.HIDE_PREMEETING_BUTTONS -}}
-config.hiddenPremeetingButtons = [ '{{ join "','" (splitList "," .Env.HIDE_PREMEETING_BUTTONS) }}' ];
+config.hiddenPremeetingButtons = [ '{{ join "','" (splitList "," .Env.HIDE_PREMEETING_BUTTONS | compact) }}' ];
 {{ end -}}
 
 // Configure remote participant video menu
@@ -554,10 +556,65 @@ config.e2eping.maxMessagePerSecond = {{ .Env.E2EPING_MAX_MESSAGE_PER_SECOND }};
 // Settings for the Excalidraw whiteboard integration.
 config.whiteboard = {
     enabled: {{ $WHITEBOARD_ENABLED }},
-    collabServerBaseUrl: '{{ $WHITEBOARD_COLLAB_SERVER_PUBLIC_URL }}'
+{{ if .Env.WHITEBOARD_COLLAB_SERVER_PUBLIC_URL -}}
+    collabServerBaseUrl: '{{ .Env.WHITEBOARD_COLLAB_SERVER_PUBLIC_URL }}'
+{{ else if .Env.WHITEBOARD_COLLAB_SERVER_URL_BASE -}}
+    collabServerBaseUrl: '{{ $PUBLIC_URL }}'
+{{ end -}}
 };
 
 // Testing
 config.testing = {
     enableAv1Support: {{ $TESTING_AV1_SUPPORT }}
 };
+
+// JaaS support: pre-configure image if JAAS_APP_ID was set.
+{{ if .Env.JAAS_APP_ID -}}
+{{ $JAAS_USE_STAGING := .Env.JAAS_USE_STAGING | default "false" | toBool -}}
+{{ $JAAS_DOMAIN := $JAAS_USE_STAGING | ternary "stage.8x8.vc" "8x8.vc" -}}
+{{ $VO_API_DOMAIN := $JAAS_USE_STAGING | ternary "api-vo-pilot.cloudflare.jitsi.net" "api-vo.cloudflare.jitsi.net" -}}
+
+config.hosts.domain = '{{ $JAAS_DOMAIN }}';
+config.hosts.muc = 'conference.{{ .Env.JAAS_APP_ID }}.{{ $JAAS_DOMAIN }}';
+config.hosts.focus = 'focus.{{ $JAAS_DOMAIN }}';
+
+config.analytics.rtcstatsEnabled = true;
+config.analytics.rtcstatsStoreLogs = true;
+config.analytics.rtcstatsUseLegacy = false;
+config.analytics.rtcstatsEndpoint = 'wss://rtcstats-server-8x8.jitsi.net/';
+config.analytics.rtcstatsPollInterval = 10000;
+config.analytics.rtcstatsSendSdp = true;
+
+config.bosh = 'https://{{ $JAAS_DOMAIN }}/{{ .Env.JAAS_APP_ID }}/http-bind';
+config.websocket = 'wss://{{ $JAAS_DOMAIN }}/{{ .Env.JAAS_APP_ID }}/xmpp-websocket';
+config.websocketKeepAliveUrl = 'https://{{ $JAAS_DOMAIN }}/{{ .Env.JAAS_APP_ID }}/_unlock';
+config.conferenceRequestUrl = 'https://{{ $JAAS_DOMAIN }}/{{ .Env.JAAS_APP_ID }}/conference-request/v1';
+
+config.hiddenDomain = 'recorder.{{ $JAAS_DOMAIN }}';
+config.hiddenFromRecorderFeatureEnabled = true;
+config.enableEmailInStats = true;
+
+config.jaasActuatorUrl = 'https://{{ $VO_API_DOMAIN }}/jaas-actuator';
+config.jaasTokenUrl = 'https://{{ $VO_API_DOMAIN }}/token-mapping';
+config.jaasConferenceCreatorUrl = 'https://{{ $VO_API_DOMAIN }}/vmms-conference-mapper/v1/access/conference-creator';
+config.webhookProxyUrl = 'https://{{ $VO_API_DOMAIN }}/webhook-proxy';
+config.billingCounterUrl = 'https://{{ $VO_API_DOMAIN }}/billing-counter/v1/connection';
+config.brandingDataUrl = 'https://{{ $VO_API_DOMAIN }}/branding/public/v1/conferences';
+config.dialInNumbersUrl = 'https://{{ $VO_API_DOMAIN }}/vmms-conference-mapper/access/v1/dids';
+config.dialInConfCodeUrl = 'https://{{ $VO_API_DOMAIN }}/vmms-conference-mapper/v1/access';
+config.dialOutAuthUrl = 'https://{{ $VO_API_DOMAIN }}/phone-authorize';
+config.dialOutRegionUrl = 'https://{{ $VO_API_DOMAIN }}/customer-configs/v1/outbound-destination';
+config.peopleSearchUrl = 'https://{{ $VO_API_DOMAIN }}/v1/directory/search';
+config.inviteServiceUrl = 'https://{{ $VO_API_DOMAIN }}/v1/meeting/invite';
+config.recordingSharingUrl = 'https://{{ $VO_API_DOMAIN }}/jaas-recordings/link';
+config.peopleSearchQueryTypes = ['user','conferenceRooms'];
+config.sipInviteUrl = 'https://{{ $VO_API_DOMAIN }}/sip-jibri-gateway/jibris/invite';
+config.jaasFeedbackMetadataURL = 'https://{{ $VO_API_DOMAIN }}/webhook-proxy/feedback';
+
+{{ if $JAAS_USE_STAGING -}}
+config.whiteboard.collabServerBaseUrl = 'https://eght-excalidraw-backend-pilot.cloudflare.jitsi.net';
+{{ else -}}
+config.whiteboard.collabServerBaseUrl = 'https://eght-excalidraw-backend.cloudflare.jitsi.net';
+{{ end -}}
+config.whiteboard.userLimit = 25;
+{{ end -}}
