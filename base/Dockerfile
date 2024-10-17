@@ -5,8 +5,8 @@ ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
 
 COPY rootfs /
 
-RUN dpkgArch="$(dpkg --print-architecture)"
-RUN case "${dpkgArch##*-}" in \
+RUN dpkgArch="$(dpkg --print-architecture)" && \
+    case "${dpkgArch##*-}" in \
         "amd64") TPL_ARCH=amd64; S6_ARCH=amd64 ;; \
         "arm64") TPL_ARCH=arm64; S6_ARCH=aarch64 ;; \
         "s390x") TPL_ARCH=s390x; S6_ARCH=s390x ;; \
